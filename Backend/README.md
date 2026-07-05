@@ -1,0 +1,44 @@
+# Backend — Developer Activity Reporting API
+
+FastAPI service that reads team membership from Confluence Cloud and issue /
+workflow data from Jira Cloud, then generates developer activity reports.
+
+## Requirements
+- Python 3.11+
+
+## Setup & run
+```powershell
+cd Backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows (PowerShell)
+# source .venv/bin/activate     # macOS / Linux
+pip install -r requirements.txt
+copy .env.example .env          # then fill in the values
+uvicorn app.main:app --reload --port 8000
+```
+
+Interactive API docs: http://localhost:8000/docs
+
+## Environment variables (`.env`)
+| Key | Description |
+|-----|-------------|
+| `ATLASSIAN_SITE` | Site base URL, e.g. `https://your-site.atlassian.net` |
+| `ATLASSIAN_EMAIL` | Atlassian account email |
+| `ATLASSIAN_TOKEN` | Atlassian API token |
+| `JIRA_PROJECT_KEY` | Jira project key (default `KAN`) |
+| `CONFLUENCE_SPACE_KEY` | Confluence space key (default `BT`) |
+| `CORS_ORIGINS` | Comma separated allowed origins (default Vite dev origin) |
+
+## Endpoints
+- `GET /api/health` → `{ "status": "ok" }`
+- `GET /api/teams` → teams + members from Confluence
+- `GET /api/teams/{team}/members` → members of a team
+- `GET /api/reports/assigned?member=&from=YYYY-MM-DD&to=YYYY-MM-DD` → Report 1
+- `GET /api/reports/build-to-qa?member=&from=&to=&rule=assignee|actor` → Report 2
+- `GET /api/reports/export?type=assigned|build-to-qa&member=&from=&to=&rule=` → `.xlsx`
+
+## Tests
+```powershell
+pytest
+```
+Covers the Confluence table parser and the Build → Pending QA detector.
