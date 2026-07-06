@@ -5,6 +5,7 @@ from app.clients.atlassian import get_client
 from app.clients.confluence_client import ConfluenceClient
 from app.clients.jira_client import JiraClient
 from app.core.config import Settings, get_settings
+from app.services.nlq_service import NlQueryService
 from app.services.report_service import ReportService
 from app.services.team_service import TeamService
 
@@ -27,3 +28,7 @@ def get_report_service() -> ReportService:
     return ReportService(
         get_jira_client(), settings.site, settings.jira_project_key
     )
+
+
+def get_nlq_service() -> NlQueryService:
+    return NlQueryService(get_report_service(), get_team_service())

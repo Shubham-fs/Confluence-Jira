@@ -71,6 +71,28 @@ class BuildToQaReport(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class QueryInterpretation(BaseModel):
+    """How a natural-language query was understood."""
+
+    report_type: str
+    member: str | None = None
+    from_date: str | None = Field(default=None, alias="from")
+    to_date: str | None = Field(default=None, alias="to")
+    rule: str
+    matched_phrases: list[str] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
+
+
+class NlQueryResponse(BaseModel):
+    """Response for the natural-language report endpoint."""
+
+    query: str
+    interpretation: QueryInterpretation
+    assigned: AssignedReport | None = None
+    build_to_qa: BuildToQaReport | None = None
+
+
 class ErrorDetail(BaseModel):
     code: str
     message: str

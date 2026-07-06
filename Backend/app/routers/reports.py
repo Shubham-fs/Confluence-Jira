@@ -1,11 +1,12 @@
 """Report endpoints (assigned issues, Build -> Pending QA, Excel export)."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
-from app.models.schemas import AssignedReport, BuildToQaReport
-from app.routers.deps import get_report_service
+from app.models.schemas import AssignedReport, BuildToQaReport, NlQueryResponse
+from app.routers.deps import get_nlq_service, get_report_service
 from app.services import excel_service
+from app.services.nlq_service import NlQueryService
 from app.services.report_service import ReportService
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
@@ -34,6 +35,18 @@ async def build_to_qa(
 ) -> BuildToQaReport:
     data = await service.build_to_qa(member, from_, to, rule)
     return BuildToQaReport.model_validate(data)
+
+
+@router.get("/query", response_model=NlQueryResponse)
+async def query(
+    q: str = Query(..., description="Natural-language question about developer activity"),
+    service: NlQueryService = Depends(get_nlq_service),
+) -> NlQueryResponse:
+    try:
+        data = await service.run(q)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return NlQueryResponse.model_validate(data)
 
 
 @router.get("/export")

@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type {
   AssignedReport,
   BuildToQaReport,
+  NlQueryResponse,
   ReportType,
   TransitionRule,
 } from './types';
@@ -28,6 +29,14 @@ export async function fetchBuildToQaReport(
     '/api/reports/build-to-qa',
     { params },
   );
+  return data;
+}
+
+/** Interpret a plain-English question and run the matching report. */
+export async function queryReports(q: string): Promise<NlQueryResponse> {
+  const { data } = await apiClient.get<NlQueryResponse>('/api/reports/query', {
+    params: { q },
+  });
   return data;
 }
 

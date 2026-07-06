@@ -58,6 +58,22 @@ export interface BuildToQaReport {
 export type TransitionRule = 'assignee' | 'actor';
 export type ReportType = 'assigned' | 'build-to-qa';
 
+export interface QueryInterpretation {
+  report_type: ReportType;
+  member: string | null;
+  from: string | null;
+  to: string | null;
+  rule: TransitionRule;
+  matched_phrases: string[];
+}
+
+export interface NlQueryResponse {
+  query: string;
+  interpretation: QueryInterpretation;
+  assigned: AssignedReport | null;
+  build_to_qa: BuildToQaReport | null;
+}
+
 export interface ApiError {
   error: {
     code: string;
