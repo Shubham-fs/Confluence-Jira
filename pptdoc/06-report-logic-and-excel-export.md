@@ -228,6 +228,36 @@ Questions answered:
 - Who performed the transition?
 - When did work move from development to QA?
 
+## Natural-Language Query Logic
+
+The natural-language feature is an interpretation layer above the two existing
+reports, not a third independent report engine.
+
+Processing steps:
+
+1. Read the plain-English text.
+2. Match a known member name.
+3. Detect whether the request means Assigned Issues or Build to Pending QA.
+4. Detect optional rule and date range.
+5. Run the matching report service.
+6. Return both the interpretation and the report payload.
+
+Example response concept:
+
+```json
+{
+  "query": "what did Yash move to QA last week",
+  "interpretation": {
+    "report_type": "build-to-qa",
+    "member": "Yash Gupta",
+    "from": "2026-06-29",
+    "to": "2026-07-05",
+    "rule": "actor"
+  },
+  "build_to_qa": {}
+}
+```
+
 ## Limitations
 
 - The app currently tracks one specific transition: Build to Pending QA.
@@ -238,6 +268,7 @@ Questions answered:
 
 ## Future Enhancements
 
+- Replace the rule-based parser with an LLM-backed strategy behind the same parser abstraction, if broader language support is needed.
 - Allow configurable source and target statuses.
 - Track historical assignee at transition time.
 - Add sprint filtering.

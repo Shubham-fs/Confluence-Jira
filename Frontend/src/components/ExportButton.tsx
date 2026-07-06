@@ -7,7 +7,7 @@ import type { ReportType, TransitionRule } from '../api/types';
 
 interface ExportButtonProps {
   type: ReportType;
-  params: ReportParams & { rule?: TransitionRule };
+  params: ReportParams & { rule?: TransitionRule; transition?: string };
   disabled?: boolean;
   onError?: (message: string) => void;
 }

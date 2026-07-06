@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchAssignedReport,
-  fetchBuildToQaReport,
+  fetchTransitions,
   type ReportParams,
 } from '../api/reports';
 import type { TransitionRule } from '../api/types';
@@ -21,20 +21,21 @@ export function useAssignedReport(filters: ReportFilters) {
   });
 }
 
-export function useBuildToQaReport(
-  filters: ReportFilters & { rule: TransitionRule },
+export function useTransitionsReport(
+  filters: ReportFilters & { rule: TransitionRule; transition?: string },
 ) {
   const { enabled, runId, ...params } = filters;
   return useQuery({
     queryKey: [
-      'build-to-qa',
+      'transitions',
       params.member,
       params.from,
       params.to,
       params.rule,
+      params.transition,
       runId,
     ],
-    queryFn: () => fetchBuildToQaReport(params),
+    queryFn: () => fetchTransitions(params),
     enabled: enabled && Boolean(params.member),
   });
 }

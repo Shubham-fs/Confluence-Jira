@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     # Comma separated list of allowed CORS origins
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # Groq LLM (advanced natural-language -> JQL planning)
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+
+    # Ordered board columns ("swimlanes") used to detect one-step forward moves.
+    workflow_statuses: str = "To Do,Build,Pending QA,Done"
+
     @property
     def site(self) -> str:
         """Base site URL without a trailing slash."""
@@ -33,6 +41,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def workflow_status_list(self) -> list[str]:
+        return [s.strip() for s in self.workflow_statuses.split(",") if s.strip()]
 
 
 @lru_cache

@@ -6,7 +6,7 @@ Use this to generate expected evaluator questions and answers.
 Prepare a viva/interview question bank for a full-stack project named Developer Activity Reporting Web App.
 
 Project summary:
-The app uses Confluence Cloud as the team source and Jira Cloud as the issue/workflow source. A FastAPI backend exposes APIs. A React frontend consumes those APIs. The app generates Assigned Issues and Build to Pending QA reports and exports them to Excel.
+The app uses Confluence Cloud as the team source and Jira Cloud as the issue/workflow source. A FastAPI backend exposes APIs. A React frontend consumes those APIs. The app generates Assigned Issues and Build to Pending QA reports, supports natural-language queries, and exports results to Excel.
 
 Create at least 60 questions with answers, grouped by topic:
 
@@ -21,8 +21,10 @@ Create at least 60 questions with answers, grouped by topic:
 9. Authentication and security
 10. Error handling
 11. Testing
-12. Deployment possibilities
-13. Limitations and future scope
+12. Natural-language query design
+13. SOLID principles used in the implementation
+14. Deployment possibilities
+15. Limitations and future scope
 
 Questions should include:
 - What problem does this project solve?
@@ -41,6 +43,9 @@ Questions should include:
 - What happens if Jira credentials are wrong?
 - Why should `.env` not be committed?
 - What are the limitations of the current implementation?
+- How does the natural-language query feature work?
+- Why was it implemented without an external LLM?
+- Where were SOLID principles applied in the backend?
 
 Make answers clear and suitable for students presenting to faculty.
 Do not include real credentials or tokens.

@@ -32,7 +32,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/assigned" element={<DashboardPage />} />
-              <Route path="/build-to-qa" element={<DashboardPage />} />
+              <Route path="/transitions" element={<DashboardPage />} />
             </Routes>
           </Layout>
         </LocalizationProvider>

@@ -29,7 +29,7 @@ export interface Column<T> {
 interface ReportTableProps<T> {
   rows: T[];
   columns: Column<T>[];
-  getRowKey: (row: T) => string;
+  getRowKey: (row: T, index: number) => string;
   emptyTitle?: string;
   emptyDescription?: string;
 }
@@ -132,8 +132,8 @@ export default function ReportTable<T>({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paged.map((row) => (
-                  <TableRow key={getRowKey(row)} hover>
+                {paged.map((row, i) => (
+                  <TableRow key={getRowKey(row, i)} hover>
                     {columns.map((col) => (
                       <TableCell key={col.id} align={col.align ?? 'left'}>
                         {col.render ? col.render(row) : (col.value(row) ?? '—')}

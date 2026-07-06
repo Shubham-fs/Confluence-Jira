@@ -76,6 +76,16 @@ Team Members page            Issues + changelog
 7. Backend converts Jira issue fields into a clean response model.
 8. Frontend displays the rows in a table.
 
+### Flow 3A - Natural-Language Query
+
+1. User types a question such as `what did Yash move to QA last week`.
+2. Frontend calls `GET /api/reports/query?q=...`.
+3. Backend loads known members from Confluence-backed team data.
+4. `DefaultQueryParser` detects report type, member, date range, and rule.
+5. `NlQueryService` runs the matching report path.
+6. Backend returns both the parsed interpretation and the report data.
+7. Frontend auto-fills filters, switches to the correct tab, and reuses the existing report view.
+
 ### Flow 4 - Build to Pending QA Report
 
 1. User selects member and date range.
@@ -121,6 +131,10 @@ This separation makes the backend easier to understand:
 - Models answer: What shape should the response have?
 - Core answers: How is configuration loaded?
 
+For the NL query path, the backend also separates parsing, member lookup, and
+report execution into small collaborators so one class does not own the whole
+feature.
+
 ## Frontend Layers
 
 The frontend is organized into:
@@ -152,6 +166,19 @@ Jira's search API rejects unbounded queries. The app always includes `project = 
 ## Important Design Decision: Changelog-Based Transition Detection
 
 For Build to Pending QA, the app cannot rely only on current issue status. A ticket may have moved from Build to Pending QA yesterday and then moved to Done today. If the app checked only current status, it would miss that historical transition. Therefore, it reads changelog history.
+
+## Important Design Decision: Deterministic NL Query Parsing
+
+The natural-language feature does not call an external LLM. It uses local,
+rule-based parsing against known team members and common date phrases. This
+keeps the feature predictable, offline-testable, and easier to explain in a
+college or demo setting.
+
+## Where SOLID Was Applied
+
+- Single Responsibility: separate detectors handle report type, rule, member matching, and date range parsing.
+- Open/Closed: new detectors or parser strategies can be introduced without changing the NLQ endpoint contract.
+- Dependency Inversion: `NlQueryService` works with abstractions for parsing, member lookup, and report execution.
 
 ## End-to-End Example
 

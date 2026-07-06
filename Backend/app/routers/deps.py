@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from app.clients.atlassian import get_client
 from app.clients.confluence_client import ConfluenceClient
+from app.clients.groq_client import GroqClient
 from app.clients.jira_client import JiraClient
 from app.core.config import Settings, get_settings
-from app.services.nlq_service import NlQueryService
+from app.services.ai_query_service import AiQueryService
 from app.services.report_service import ReportService
 from app.services.team_service import TeamService
 
@@ -26,9 +27,25 @@ def get_team_service() -> TeamService:
 def get_report_service() -> ReportService:
     settings: Settings = get_settings()
     return ReportService(
-        get_jira_client(), settings.site, settings.jira_project_key
+        get_jira_client(),
+        settings.site,
+        settings.jira_project_key,
+        settings.workflow_status_list,
     )
 
 
-def get_nlq_service() -> NlQueryService:
-    return NlQueryService(get_report_service(), get_team_service())
+def get_groq_client() -> GroqClient:
+    settings: Settings = get_settings()
+    return GroqClient(
+        settings.groq_api_key, settings.groq_model, settings.groq_base_url
+    )
+
+
+def get_ai_query_service() -> AiQueryService:
+    settings: Settings = get_settings()
+    return AiQueryService(
+        get_report_service(),
+        get_team_service(),
+        get_groq_client(),
+        settings.jira_project_key,
+    )

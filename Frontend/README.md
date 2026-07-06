@@ -21,6 +21,8 @@ npm run dev                # http://localhost:5173
 
 ## Features
 - Cascading Team → Member selectors sourced from Confluence.
+- Plain-English query box that interprets questions and auto-fills the right
+  report, member, date range, and rule.
 - Date range picker and a **Generate** action.
 - Two report tabs: **Assigned Issues** and **Build → Pending QA** (with an
   assignee/actor rule toggle).
@@ -33,3 +35,10 @@ npm run dev                # http://localhost:5173
 - `npm run dev` — start the dev server
 - `npm run build` — type-check and build for production
 - `npm run preview` — preview the production build
+
+## Natural-language query flow
+- The dashboard calls `GET /api/reports/query` through `queryReports()`.
+- The backend returns an interpretation object plus either the assigned report or
+  the Build → Pending QA report.
+- The page reuses the existing report views instead of rendering a separate table
+  for the NL query path.

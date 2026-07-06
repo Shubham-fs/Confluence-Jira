@@ -26,6 +26,7 @@ Demo script must include these steps:
 - Show Confluence Team Members page and explain team source.
 - Show Jira Kanban board and explain issue/status/assignee.
 - Open frontend at http://localhost:5173.
+- Use the plain-English query box with a sample question.
 - Select a team.
 - Select a member.
 - Explain date range filtering.
@@ -42,6 +43,8 @@ Important explanations:
 - Actor = person who performed a transition in changelog.
 - Changelog = history of changes in Jira.
 - Build to Pending QA = workflow transition detected by code.
+- Natural-language query = a backend-interpreted plain-English request that maps to an existing report.
+- SOLID design = parsing, member lookup, and report execution are separated into smaller backend collaborators.
 
 Make the script natural, not robotic. Use simple words but keep technical correctness.
 Do not include secrets or API tokens.

@@ -32,6 +32,7 @@ class JiraClient:
 
     def __init__(self, client: httpx.AsyncClient) -> None:
         self._client = client
+        self._all_users_cache: list[dict[str, Any]] | None = None
 
     async def myself(self) -> dict[str, Any]:
         """Verify authentication and return the current user."""
@@ -93,9 +94,59 @@ class JiraClient:
         return values
 
     async def user_search(self, query: str) -> list[dict[str, Any]]:
-        """Resolve users by name or email via ``/rest/api/3/user/search``."""
+        """Resolve users by name or email.
+
+        Primary path is ``/rest/api/3/user/search?query=``. On some sites that
+        endpoint returns nothing (user-privacy/visibility settings hide the
+        query index), so when it yields no matches we fall back to scanning the
+        full user directory (``/rest/api/3/users/search``) and filtering by
+        display name locally.
+        """
         resp = await self._client.get(
             "/rest/api/3/user/search", params={"query": query}
         )
         _raise_for_status(resp)
-        return resp.json()
+        results = resp.json()
+        if results:
+            return results
+        return await self._search_all_users(query)
+
+    async def _list_all_users(self) -> list[dict[str, Any]]:
+        """Return (and cache) the full user directory for this site."""
+        if self._all_users_cache is not None:
+            return self._all_users_cache
+        users: list[dict[str, Any]] = []
+        start_at = 0
+        page_size = 100
+        while True:
+            resp = await self._client.get(
+                "/rest/api/3/users/search",
+                params={"startAt": start_at, "maxResults": page_size},
+            )
+            _raise_for_status(resp)
+            page = resp.json()
+            if not page:
+                break
+            users.extend(page)
+            start_at += page_size
+            if len(page) < page_size:
+                break
+        self._all_users_cache = users
+        return users
+
+    async def _search_all_users(self, query: str) -> list[dict[str, Any]]:
+        """Filter the full directory by display name / email match."""
+        term = query.strip().lower()
+        if not term:
+            return []
+        users = await self._list_all_users()
+        matches = [
+            u
+            for u in users
+            if u.get("accountType") == "atlassian"
+            and (
+                term in (u.get("displayName") or "").lower()
+                or term in (u.get("emailAddress") or "").lower()
+            )
+        ]
+        return matches

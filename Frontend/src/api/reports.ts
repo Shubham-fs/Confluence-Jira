@@ -1,9 +1,9 @@
 import { apiClient } from './client';
 import type {
+  AiQueryResponse,
   AssignedReport,
-  BuildToQaReport,
-  NlQueryResponse,
   ReportType,
+  TransitionReport,
   TransitionRule,
 } from './types';
 
@@ -22,19 +22,19 @@ export async function fetchAssignedReport(
   return data;
 }
 
-export async function fetchBuildToQaReport(
-  params: ReportParams & { rule: TransitionRule },
-): Promise<BuildToQaReport> {
-  const { data } = await apiClient.get<BuildToQaReport>(
-    '/api/reports/build-to-qa',
+export async function fetchTransitions(
+  params: ReportParams & { rule: TransitionRule; transition?: string },
+): Promise<TransitionReport> {
+  const { data } = await apiClient.get<TransitionReport>(
+    '/api/reports/transitions',
     { params },
   );
   return data;
 }
 
-/** Interpret a plain-English question and run the matching report. */
-export async function queryReports(q: string): Promise<NlQueryResponse> {
-  const { data } = await apiClient.get<NlQueryResponse>('/api/reports/query', {
+/** Run an advanced free-form prompt planned by the Groq LLM into JQL. */
+export async function aiQueryReports(q: string): Promise<AiQueryResponse> {
+  const { data } = await apiClient.get<AiQueryResponse>('/api/reports/ai-query', {
     params: { q },
   });
   return data;
@@ -43,7 +43,7 @@ export async function queryReports(q: string): Promise<NlQueryResponse> {
 /** Trigger a browser download of the Excel export for a report. */
 export async function downloadReportExcel(
   type: ReportType,
-  params: ReportParams & { rule?: TransitionRule },
+  params: ReportParams & { rule?: TransitionRule; transition?: string },
 ): Promise<void> {
   const response = await apiClient.get('/api/reports/export', {
     params: { type, ...params },

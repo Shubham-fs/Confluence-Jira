@@ -21,6 +21,7 @@ The goal is to build a working reporting tool that demonstrates:
 - Real-time data fetching from Confluence Cloud.
 - Real-time data fetching from Jira Cloud.
 - Workflow transition analysis using Jira changelog history.
+- Natural-language query interpretation for common reporting questions.
 - A clean React dashboard for report generation.
 - Excel export for business-friendly reporting.
 
@@ -29,13 +30,14 @@ The goal is to build a working reporting tool that demonstrates:
 The user can:
 
 1. Open the dashboard in the browser.
-2. Select a team from Confluence data.
-3. Select a member from the selected team.
-4. Choose a date range or leave dates optional.
-5. Generate the Assigned Issues report.
-6. Generate the Build to Pending QA report.
-7. Switch between assignee-based and actor-based transition matching.
-8. Export either report to an Excel file.
+2. Ask a plain-English question such as `issues assigned to Yash this month`.
+3. Select a team from Confluence data.
+4. Select a member from the selected team.
+5. Choose a date range or leave dates optional.
+6. Generate the Assigned Issues report.
+7. Generate the Build to Pending QA report.
+8. Switch between assignee-based and actor-based transition matching.
+9. Export either report to an Excel file.
 
 ## Reports Built in This Project
 
@@ -144,6 +146,7 @@ It also demonstrates practical full-stack development concepts:
 - Authentication with external services
 - Frontend state management
 - Backend service layering
+- SOLID-oriented refactoring in backend orchestration
 - Data transformation
 - File export
 - Error handling

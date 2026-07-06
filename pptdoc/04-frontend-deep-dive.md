@@ -67,8 +67,28 @@ State values:
 - `rule`: Build to Pending QA matching mode, either `assignee` or `actor`.
 - `applied`: filters that were applied when Generate was clicked.
 - `error`: current error message.
+- `nlText`: plain-English query text.
+- `nlLoading`: loading state for NL query interpretation.
+- `nlInfo`: snackbar message confirming the interpreted result.
 
 The app separates selected filters from applied filters. This means the user can change dropdowns without immediately refetching until they click Generate.
+
+The natural-language query path still reuses the same applied-filter model,
+which avoids introducing a second report rendering path.
+
+## Plain-English Query Box
+
+The dashboard includes a text box where the user can ask things like:
+
+- `issues assigned to Yash this month`
+- `what did Shubham move to QA last week`
+
+When the user clicks Ask:
+
+1. Frontend calls `queryReports()`.
+2. Backend returns the parsed interpretation.
+3. Frontend sets member, dates, rule, and active tab from that interpretation.
+4. The page triggers the same report views already used by manual filters.
 
 ## Why `runId` Exists
 
@@ -170,6 +190,7 @@ Functions:
 
 - `fetchAssignedReport(params)` calls `/api/reports/assigned`.
 - `fetchBuildToQaReport(params)` calls `/api/reports/build-to-qa`.
+- `queryReports(q)` calls `/api/reports/query`.
 - `downloadReportExcel(type, params)` calls `/api/reports/export` and triggers browser download.
 
 ## Hooks Layer

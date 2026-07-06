@@ -7,6 +7,8 @@ Create a detailed technical PowerPoint presentation for a project named "Develop
 
 The project is a full-stack application that integrates Confluence Cloud and Jira Cloud. It reads team membership from a Confluence page named "Team Members", reads Jira issues and changelog history from a Jira project named KAN, and generates developer activity reports in a React dashboard. It has a FastAPI backend and a React + Vite + TypeScript frontend.
 
+The latest version also supports a natural-language query box that interprets questions like "issues assigned to Yash this month" or "what did Shubham move to QA last week" and routes them to the correct report.
+
 Audience:
 - College project evaluators, teammates, and beginner developers.
 - Assume the audience understands basic web development but not Jira/Confluence APIs.
@@ -34,14 +36,15 @@ Required slide deck structure:
 16. API endpoints
 17. Data flow sequence
 18. Excel export feature
-19. Security and environment variables
-20. Error handling and validation
-21. Live demo plan
+19. Natural-language query feature
+20. Security and environment variables
+21. Error handling and validation
 22. Testing and verification
-23. Limitations
-24. Future enhancements
-25. Conclusion
-26. Q&A slide
+23. SOLID principles applied
+24. Limitations
+25. Future enhancements
+26. Conclusion
+27. Q&A slide
 
 Project details to include:
 - Backend framework: FastAPI.
@@ -66,6 +69,7 @@ Important backend endpoints:
 - GET /api/teams/{team}/members
 - GET /api/reports/assigned?member=...&from=...&to=...
 - GET /api/reports/build-to-qa?member=...&from=...&to=...&rule=assignee|actor
+- GET /api/reports/query?q=what did Yash move to QA last week
 - GET /api/reports/export?type=assigned|build-to-qa&member=...
 
 Explain the reports:
@@ -73,6 +77,17 @@ Explain the reports:
 - Build to Pending QA report scans each issue changelog and finds status changes where fromString is "Build" and toString is "Pending QA".
 - Rule = assignee means include the issue if the current assignee is the selected member.
 - Rule = actor means include the transition if the changelog author is the selected member.
+
+Explain the natural-language feature:
+- The frontend sends a plain-English question to `/api/reports/query`.
+- The backend parses member, date range, report type, and optional actor rule.
+- The query layer is deterministic and does not require an external LLM.
+
+Explain where SOLID was applied:
+- `DefaultQueryParser` parses text.
+- `TeamMemberDirectory` isolates member retrieval.
+- `NlQueryService` orchestrates report execution through abstractions.
+- Small detector classes keep the parser open for extension.
 
 Explain Jira terms:
 - Issue means a ticket/work item.

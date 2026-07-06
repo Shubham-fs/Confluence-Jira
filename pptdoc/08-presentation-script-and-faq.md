@@ -8,13 +8,19 @@ In many teams, reporting is done manually. A team lead checks Confluence for tea
 
 The user selects a team, a developer, and an optional date range. The app then generates two reports: Assigned Issues and Build to Pending QA transitions. It also allows exporting the result to Excel. The backend is built with FastAPI, and the frontend is built with React, Vite, TypeScript, and Material UI.
 
+We also added a plain-English query box, so a user can ask a question like what did Yash move to QA last week and the app interprets it into the correct report.
+
 ## 5-Minute Technical Explanation Script
 
 This project has four main parts: frontend, backend, Confluence, and Jira.
 
 The frontend is a React dashboard. It gives the user dropdowns for team and member selection, date pickers for filtering, report tabs, and an export button. It does not directly talk to Jira or Confluence because that would expose credentials in the browser.
 
+The dashboard also includes a plain-English query box that calls a dedicated backend endpoint. The backend parses the question and maps it to the same report flows already used by the manual filters.
+
 The backend is built using FastAPI. It receives requests from the frontend, reads settings from `.env`, and uses an async HTTP client to communicate with Atlassian APIs. It has separate client classes for Jira and Confluence, service classes for business logic, routers for endpoints, and schemas for response validation.
+
+In the natural-language path, we applied SOLID principles by separating parsing, member lookup, and report execution. The orchestration service depends on abstractions, which made the feature easier to test.
 
 Confluence is used as the source of team membership. The app finds a Confluence page named Team Members, reads its storage-format body, parses the table, and returns teams and members to the frontend.
 
@@ -57,6 +63,14 @@ Select Team B and a member such as Shubham.
 Say:
 
 When we select the team, the member dropdown is populated from Confluence. When we select the member and click Generate, the backend resolves this member name to a Jira account ID.
+
+### Demo Step 4A - Ask in Plain English
+
+Type `what did Yash move to QA last week`.
+
+Say:
+
+This is our natural-language query feature. The backend interprets the text, detects the member, date range, and report type, then routes the request to the same reporting logic. It does not use a paid AI API; it is deterministic and testable.
 
 ### Demo Step 5 - Assigned Issues
 
@@ -232,6 +246,14 @@ It depends on correct Atlassian permissions, expects a specific Confluence table
 ### 24. What are future improvements?
 
 Charts, sprint filtering, multi-project support, configurable transitions, app login, deployment, and more detailed QA/reviewer role detection.
+
+### 25. Does the app support natural-language queries?
+
+Yes. A user can type a plain-English reporting question, and the backend interprets it into structured filters and the appropriate report.
+
+### 26. Where were SOLID principles applied?
+
+Mainly in the backend NL query design. Parsing, member lookup, and report execution were separated into smaller collaborators, and the orchestration service depends on abstractions instead of hard-coded concrete classes.
 
 ## Closing Script
 

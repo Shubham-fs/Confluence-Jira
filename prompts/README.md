@@ -14,3 +14,9 @@ Important:
 - Do not paste real secrets, API tokens, or `.env` values into any AI tool.
 - If a tool asks for project credentials, only describe them as environment variables.
 - Use screenshots from the running app and Jira board when making the final PPT.
+
+The prompts should now mention:
+
+- the natural-language query feature
+- the `/api/reports/query` endpoint
+- where SOLID principles were applied in the backend NL query implementation

@@ -12,6 +12,9 @@ The user selects a **Team**, a **Team member**, and a **Date range** and gets:
 - **Report 2 — Build → Pending QA**: issues that transitioned from status
   `Build` to `Pending QA`, matched either by the current **assignee** or by the
   **actor** who performed the transition (toggle via `rule=assignee|actor`).
+- **Natural-language query**: a plain-English question such as `issues assigned
+  to Yash this month` or `what did Shubham move to QA last week`, interpreted by
+  the backend and routed to the matching report.
 - Both reports can be exported to Excel (`.xlsx`).
 
 ## Structure
@@ -46,9 +49,19 @@ npm run dev                 # http://localhost:5173
 2. **Docs**: open http://localhost:8000/docs (interactive Swagger UI).
 3. **Teams**: on the dashboard, the Team dropdown lists teams from Confluence.
 4. **Members**: selecting a team populates the Member dropdown.
-5. **Report 1**: pick a member + date range → **Generate** → Assigned Issues tab.
-6. **Report 2**: switch to the Build → Pending QA tab, try both rule toggles.
-7. **Export**: click **Export to Excel** on either report to download an `.xlsx`.
+5. **Natural-language query**: ask `what did Yash move to QA last week` in the
+   dashboard; the app should auto-fill filters and open the matching tab.
+6. **Report 1**: pick a member + date range → **Generate** → Assigned Issues tab.
+7. **Report 2**: switch to the Build → Pending QA tab, try both rule toggles.
+8. **Export**: click **Export to Excel** on either report to download an `.xlsx`.
+
+## Design notes
+- The natural-language feature is deterministic and testable. It does not call
+  an external LLM; it parses known phrases, dates, and team members locally.
+- SOLID was applied mainly in `Backend/app/services/nlq_service.py`:
+  `DefaultQueryParser` handles parsing, `TeamMemberDirectory` handles member
+  lookup, and `NlQueryService` orchestrates report execution through injected
+  abstractions.
 
 ## Security notes
 - Secrets live only in `Backend/.env` (git-ignored). Never commit real tokens.
@@ -59,4 +72,5 @@ npm run dev                 # http://localhost:5173
 cd Backend
 pytest
 ```
-Covers the Confluence table parser and the Build → Pending QA detector.
+Covers the Confluence table parser, the Build → Pending QA detector, the
+natural-language query parser, and NL query service orchestration.

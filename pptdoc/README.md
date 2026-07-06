@@ -14,3 +14,9 @@ Recommended reading order:
 8. `08-presentation-script-and-faq.md` - ready-to-speak script and expected Q&A.
 
 Do not add real `.env` values or API tokens to slides. Show variable names only.
+
+This pack now also documents:
+
+- the natural-language query feature
+- the `/api/reports/query` endpoint
+- where SOLID principles were applied in the backend NL query design

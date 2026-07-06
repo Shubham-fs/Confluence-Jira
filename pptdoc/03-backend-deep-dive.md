@@ -99,6 +99,7 @@ Endpoints:
 ```text
 GET /api/reports/assigned
 GET /api/reports/build-to-qa
+GET /api/reports/query
 GET /api/reports/export
 ```
 
@@ -106,6 +107,7 @@ Purpose:
 
 - Generate assigned issue report.
 - Generate Build to Pending QA report.
+- Interpret a natural-language report request.
 - Export either report as Excel.
 
 ## Dependency Injection
@@ -120,6 +122,8 @@ teams router -> get_team_service -> TeamService -> ConfluenceClient
 ```
 
 This makes testing and maintenance easier.
+
+The same dependency pattern is also used in the NL query feature.
 
 ## Jira Client
 
@@ -190,6 +194,54 @@ Major responsibilities:
 - Detect Build to Pending QA transitions from changelog entries.
 - Filter by date.
 - Return frontend-friendly JSON.
+
+## Natural-Language Query Service
+
+File: `Backend/app/services/nlq_service.py`
+
+Responsibilities:
+
+1. Read the known member list through a directory abstraction.
+2. Parse a plain-English question into a structured `QueryIntent`.
+3. Choose the correct report path.
+4. Return both the parsed interpretation and the generated report.
+
+Example supported queries:
+
+- `issues assigned to Yash this month`
+- `what did Shubham move to QA last week`
+- `tickets for Kashish between 2026-03-01 and 2026-03-31`
+
+## Where SOLID Was Applied
+
+### Single Responsibility Principle
+
+- `DefaultQueryParser` only parses text.
+- `TeamMemberDirectory` only provides known members.
+- `NlQueryService` only orchestrates parsing plus report execution.
+
+### Open/Closed Principle
+
+The parser is composed of smaller detectors:
+
+- `PhraseReportTypeDetector`
+- `PhraseRuleDetector`
+- `KnownMemberDetector`
+- `RelativeDateRangeDetector`
+
+New parsing rules can be added by extending these collaborators instead of
+rewriting service orchestration.
+
+### Dependency Inversion Principle
+
+`NlQueryService` depends on abstractions:
+
+- `QueryParser`
+- `MemberDirectory`
+- `ReportGateway`
+
+This made it possible to test the service with fake collaborators instead of
+real Jira or Confluence services.
 
 ## Account ID Resolution
 

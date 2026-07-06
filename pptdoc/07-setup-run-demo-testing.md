@@ -59,6 +59,12 @@ Swagger docs:
 http://localhost:8000/docs
 ```
 
+Natural-language query endpoint:
+
+```text
+http://localhost:8000/api/reports/query?q=what%20did%20Yash%20move%20to%20QA%20last%20week
+```
+
 Health check:
 
 ```text
@@ -163,6 +169,20 @@ Explain:
 - Team list came from Confluence.
 - Members are loaded dynamically for the selected team.
 
+### Step 4A - Ask in Plain English
+
+Type a question such as:
+
+```text
+what did Yash move to QA last week
+```
+
+Explain:
+
+- The frontend sends this text to `/api/reports/query`.
+- The backend interprets the member, dates, and report type.
+- The dashboard auto-fills the filters and opens the correct tab.
+
 ### Step 5 - Select Member
 
 Choose Shubham or Yash.
@@ -221,6 +241,8 @@ Tests cover:
 
 - Confluence table parsing.
 - Build to Pending QA transition detection.
+- Natural-language query parsing.
+- NLQ service orchestration through injected abstractions.
 
 ## Manual Verification
 
@@ -230,8 +252,9 @@ Use these checks:
 2. Open `/api/teams`.
 3. Open `/api/reports/assigned?member=Shubham`.
 4. Open `/api/reports/build-to-qa?member=Shubham`.
-5. Try Excel export.
-6. Confirm frontend displays same data.
+5. Open `/api/reports/query?q=issues%20assigned%20to%20Yash%20this%20month`.
+6. Try Excel export.
+7. Confirm frontend displays same data.
 
 ## Common Problems
 

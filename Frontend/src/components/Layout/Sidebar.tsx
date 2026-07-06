@@ -53,13 +53,13 @@ export default function Sidebar() {
           </ListItemButton>
           <ListItemButton
             component={Link}
-            to="/build-to-qa"
-            selected={pathname === '/build-to-qa'}
+            to="/transitions"
+            selected={pathname === '/transitions'}
           >
             <ListItemIcon>
               <PublishedWithChangesIcon />
             </ListItemIcon>
-            <ListItemText primary="Build → Pending QA" />
+            <ListItemText primary="Transitions" />
           </ListItemButton>
         </List>
       </Box>

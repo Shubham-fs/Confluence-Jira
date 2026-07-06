@@ -199,3 +199,8 @@ Confluence answers: who is in each team?
 Jira answers: what work exists and what happened to it?
 
 The backend combines both sources into reports that are easy for humans to read.
+
+For the natural-language query feature, Confluence also supplies the known
+member names that help the parser resolve who the question refers to. Jira still
+remains the source of report truth; the NL query layer only chooses which report
+to run and with what filters.

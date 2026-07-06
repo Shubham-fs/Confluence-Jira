@@ -46,51 +46,68 @@ class AssignedReport(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class BuildToQaIssue(BaseModel):
-    """A single row in Report 2 (Build -> Pending QA transitions)."""
+class TransitionIssue(BaseModel):
+    """A single row in Report 2 (one-step forward status transitions)."""
 
     key: str
     summary: str | None = None
     transitioned_at: str | None = None
     performed_by: str | None = None
     assignee: str | None = None
-    from_status: str = "Build"
-    to_status: str = "Pending QA"
+    from_status: str | None = None
+    to_status: str | None = None
     url: str | None = None
 
 
-class BuildToQaReport(BaseModel):
+class TransitionReport(BaseModel):
     member: str
     account_id: str | None = None
     rule: str
     from_date: str | None = Field(default=None, alias="from")
     to_date: str | None = Field(default=None, alias="to")
+    transition: str | None = None
+    workflow: list[str] = Field(default_factory=list)
     count: int
-    issues: list[BuildToQaIssue]
+    issues: list[TransitionIssue]
 
     model_config = {"populate_by_name": True}
 
 
-class QueryInterpretation(BaseModel):
-    """How a natural-language query was understood."""
+class AiQueryPlan(BaseModel):
+    """The LLM's structured interpretation of a free-form prompt."""
 
     report_type: str
-    member: str | None = None
+    members: list[str] = Field(default_factory=list)
     from_date: str | None = Field(default=None, alias="from")
     to_date: str | None = Field(default=None, alias="to")
-    rule: str
-    matched_phrases: list[str] = Field(default_factory=list)
+    requires_changelog: bool = False
+    proposed_jql: str = ""
+    explanation: str = ""
 
     model_config = {"populate_by_name": True}
 
 
-class NlQueryResponse(BaseModel):
-    """Response for the natural-language report endpoint."""
+class AiIssue(BaseModel):
+    """A single issue row returned by an LLM-planned JQL search."""
+
+    key: str
+    summary: str | None = None
+    status: str | None = None
+    assignee: str | None = None
+    reporter: str | None = None
+    created: str | None = None
+    updated: str | None = None
+    url: str | None = None
+
+
+class AiQueryResponse(BaseModel):
+    """Response for the Groq-backed advanced query endpoint."""
 
     query: str
-    interpretation: QueryInterpretation
-    assigned: AssignedReport | None = None
-    build_to_qa: BuildToQaReport | None = None
+    plan: AiQueryPlan
+    executed_jql: str
+    count: int
+    issues: list[AiIssue]
 
 
 class ErrorDetail(BaseModel):

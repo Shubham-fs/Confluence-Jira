@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import {
   Link,
+  MenuItem,
   Stack,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
   Typography,
 } from '@mui/material';
-import type { BuildToQaIssue, TransitionRule } from '../../api/types';
+import type { TransitionIssue, TransitionRule } from '../../api/types';
 import type { ReportParams } from '../../api/reports';
-import { useBuildToQaReport } from '../../hooks/useReports';
+import { useTransitionsReport } from '../../hooks/useReports';
 import { extractErrorMessage } from '../../api/client';
 import ReportTable, { type Column } from '../ReportTable';
 import ExportButton from '../ExportButton';
@@ -16,7 +19,7 @@ import ErrorState from '../ErrorState';
 import { TableSkeleton } from '../LoadingState';
 import { formatDate } from '../../utils/format';
 
-interface BuildToQaReportViewProps {
+interface TransitionReportViewProps {
   params: ReportParams;
   runId?: number;
   rule: TransitionRule;
@@ -25,7 +28,7 @@ interface BuildToQaReportViewProps {
   onError: (message: string) => void;
 }
 
-const columns: Column<BuildToQaIssue>[] = [
+const columns: Column<TransitionIssue>[] = [
   {
     id: 'key',
     label: 'Issue',
@@ -40,6 +43,8 @@ const columns: Column<BuildToQaIssue>[] = [
       ),
   },
   { id: 'summary', label: 'Summary', value: (r) => r.summary },
+  { id: 'from_status', label: 'From', value: (r) => r.from_status },
+  { id: 'to_status', label: 'To', value: (r) => r.to_status },
   {
     id: 'transitioned_at',
     label: 'Transitioned At',
@@ -50,15 +55,40 @@ const columns: Column<BuildToQaIssue>[] = [
   { id: 'assignee', label: 'Assignee', value: (r) => r.assignee },
 ];
 
-export default function BuildToQaReportView({
+const DEFAULT_WORKFLOW = ['To Do', 'Build', 'Pending QA', 'Done'];
+
+/** Build the list of one-step forward moves from an ordered workflow. */
+function forwardSteps(workflow: string[]): { value: string; label: string }[] {
+  const steps: { value: string; label: string }[] = [];
+  for (let i = 0; i < workflow.length - 1; i += 1) {
+    const to = workflow[i + 1];
+    steps.push({ value: to, label: `${workflow[i]} → ${to}` });
+  }
+  return steps;
+}
+
+export default function TransitionReportView({
   params,
   runId,
   rule,
   onRuleChange,
   enabled,
   onError,
-}: BuildToQaReportViewProps) {
-  const query = useBuildToQaReport({ ...params, rule, runId, enabled });
+}: TransitionReportViewProps) {
+  const [transition, setTransition] = useState('');
+  const query = useTransitionsReport({
+    ...params,
+    rule,
+    transition: transition || undefined,
+    runId,
+    enabled,
+  });
+
+  const workflow =
+    query.data?.workflow && query.data.workflow.length > 1
+      ? query.data.workflow
+      : DEFAULT_WORKFLOW;
+  const steps = forwardSteps(workflow);
 
   return (
     <Stack spacing={2}>
@@ -69,8 +99,8 @@ export default function BuildToQaReportView({
         flexWrap="wrap"
         gap={1}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Tooltip title="Match by current assignee or by who performed the transition">
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+          <Tooltip title="Match by the assignee at the transition or by who performed it">
             <ToggleButtonGroup
               size="small"
               exclusive
@@ -81,13 +111,28 @@ export default function BuildToQaReportView({
               <ToggleButton value="actor">By actor</ToggleButton>
             </ToggleButtonGroup>
           </Tooltip>
+          <TextField
+            select
+            size="small"
+            label="Transition"
+            value={transition}
+            onChange={(e) => setTransition(e.target.value)}
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">All forward transitions</MenuItem>
+            {steps.map((s) => (
+              <MenuItem key={s.value} value={s.value}>
+                {s.label}
+              </MenuItem>
+            ))}
+          </TextField>
           <Typography color="text.secondary">
             {query.data ? `${query.data.count} transition(s)` : ''}
           </Typography>
         </Stack>
         <ExportButton
-          type="build-to-qa"
-          params={{ ...params, rule }}
+          type="transitions"
+          params={{ ...params, rule, transition: transition || undefined }}
           disabled={!query.data || query.data.count === 0}
           onError={onError}
         />
@@ -104,9 +149,11 @@ export default function BuildToQaReportView({
         <ReportTable
           rows={query.data?.issues ?? []}
           columns={columns}
-          getRowKey={(r) => `${r.key}-${r.transitioned_at}`}
-          emptyTitle="No Build → Pending QA transitions"
-          emptyDescription="No matching transitions were found for this member in the selected range."
+          getRowKey={(r, i) =>
+            `${r.key}-${r.from_status}-${r.to_status}-${r.transitioned_at}-${i}`
+          }
+          emptyTitle="No forward transitions"
+          emptyDescription="No one-step forward status transitions were found for this member in the selected range."
         />
       )}
     </Stack>

@@ -10,6 +10,8 @@ Project name: Developer Activity Reporting Web App.
 Core idea:
 The application automates developer activity reporting by connecting to Confluence Cloud for team membership and Jira Cloud for issues and workflow history. The user selects a team, member, and optional date range. The app generates two reports: Assigned Issues and Build to Pending QA transitions. The user can export both reports as Excel files.
 
+The application also includes a natural-language query box that interprets common reporting questions and routes them to the correct backend report.
+
 Please write detailed slide content for these sections:
 
 1. Project introduction
@@ -34,12 +36,19 @@ Please write detailed slide content for these sections:
 
 4. Frontend explanation
 - React app shows dashboard
+- Dashboard includes a plain-English query box
 - Team dropdown calls /api/teams
 - Member dropdown calls /api/teams/{team}/members
 - Date picker creates optional date filters
 - Generate button triggers report queries
 - Tabs show assigned issues and Build to Pending QA
 - Export button downloads Excel
+
+4A. Natural-language query explanation
+- Frontend calls `/api/reports/query`
+- Backend detects member, date range, report type, and rule
+- The returned interpretation auto-fills filters and opens the correct tab
+- The feature is deterministic, not dependent on an external AI API
 
 5. Report logic
 - Assigned Issues uses JQL: project = KAN AND assignee = accountId
@@ -49,6 +58,8 @@ Please write detailed slide content for these sections:
 
 6. API endpoints
 Explain each endpoint, its purpose, parameters, and response.
+
+Also explain where SOLID principles were applied in the backend NL query implementation.
 
 7. Security
 - Real tokens are stored only in Backend/.env

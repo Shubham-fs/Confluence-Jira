@@ -34,44 +34,59 @@ export interface AssignedReport {
   issues: AssignedIssue[];
 }
 
-export interface BuildToQaIssue {
+export interface TransitionIssue {
   key: string;
   summary: string | null;
   transitioned_at: string | null;
   performed_by: string | null;
   assignee: string | null;
-  from_status: string;
-  to_status: string;
+  from_status: string | null;
+  to_status: string | null;
   url: string | null;
 }
 
-export interface BuildToQaReport {
+export interface TransitionReport {
   member: string;
   account_id: string | null;
   rule: string;
   from: string;
   to: string;
+  transition: string | null;
+  workflow: string[];
   count: number;
-  issues: BuildToQaIssue[];
+  issues: TransitionIssue[];
 }
 
 export type TransitionRule = 'assignee' | 'actor';
-export type ReportType = 'assigned' | 'build-to-qa';
+export type ReportType = 'assigned' | 'transitions';
 
-export interface QueryInterpretation {
-  report_type: ReportType;
-  member: string | null;
+export interface AiQueryPlan {
+  report_type: string;
+  members: string[];
   from: string | null;
   to: string | null;
-  rule: TransitionRule;
-  matched_phrases: string[];
+  requires_changelog: boolean;
+  proposed_jql: string;
+  explanation: string;
 }
 
-export interface NlQueryResponse {
+export interface AiIssue {
+  key: string;
+  summary: string | null;
+  status: string | null;
+  assignee: string | null;
+  reporter: string | null;
+  created: string | null;
+  updated: string | null;
+  url: string | null;
+}
+
+export interface AiQueryResponse {
   query: string;
-  interpretation: QueryInterpretation;
-  assigned: AssignedReport | null;
-  build_to_qa: BuildToQaReport | null;
+  plan: AiQueryPlan;
+  executed_jql: string;
+  count: number;
+  issues: AiIssue[];
 }
 
 export interface ApiError {

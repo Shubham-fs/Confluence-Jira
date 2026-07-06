@@ -3,6 +3,9 @@
 FastAPI service that reads team membership from Confluence Cloud and issue /
 workflow data from Jira Cloud, then generates developer activity reports.
 
+It also supports deterministic natural-language queries that interpret a plain
+English question and run the matching report.
+
 ## Requirements
 - Python 3.11+
 
@@ -35,10 +38,26 @@ Interactive API docs: http://localhost:8000/docs
 - `GET /api/teams/{team}/members` → members of a team
 - `GET /api/reports/assigned?member=&from=YYYY-MM-DD&to=YYYY-MM-DD` → Report 1
 - `GET /api/reports/build-to-qa?member=&from=&to=&rule=assignee|actor` → Report 2
+- `GET /api/reports/query?q=what did Yash move to QA last week` → interpret a plain-English query and return the matching report
 - `GET /api/reports/export?type=assigned|build-to-qa&member=&from=&to=&rule=` → `.xlsx`
+
+## Natural-language query design
+- Parsing is local and deterministic; no external AI service is required.
+- Example queries:
+	- `issues assigned to Yash this month`
+	- `what did Shubham move to QA last week`
+	- `tickets for Kashish between 2026-03-01 and 2026-03-31`
+- The response includes both the parsed interpretation and the selected report.
+
+## Where SOLID was applied
+- `DefaultQueryParser` follows Single Responsibility by only converting text into a `QueryIntent`.
+- `TeamMemberDirectory` isolates member retrieval from Confluence-backed services.
+- `NlQueryService` depends on abstractions (`QueryParser`, `MemberDirectory`, `ReportGateway`) rather than concrete implementations, which improves testability and follows Dependency Inversion.
+- Small detector classes (`PhraseReportTypeDetector`, `PhraseRuleDetector`, `KnownMemberDetector`, `RelativeDateRangeDetector`) keep the parser open for extension without rewriting orchestration code.
 
 ## Tests
 ```powershell
 pytest
 ```
-Covers the Confluence table parser and the Build → Pending QA detector.
+Covers the Confluence table parser, the Build → Pending QA detector, the
+natural-language query parser, and the injected-collaborator NLQ service flow.

@@ -50,15 +50,25 @@ def build_assigned_workbook(report: dict[str, Any]) -> bytes:
     return _to_bytes(wb)
 
 
-def build_build_to_qa_workbook(report: dict[str, Any]) -> bytes:
+def build_transitions_workbook(report: dict[str, Any]) -> bytes:
     wb = Workbook()
     ws = wb.active
-    ws.title = "Build to Pending QA"
-    headers = ["Key", "Summary", "Transitioned At", "Performed By", "Assignee"]
+    ws.title = "Forward Transitions"
+    headers = [
+        "Key",
+        "Summary",
+        "From",
+        "To",
+        "Transitioned At",
+        "Performed By",
+        "Assignee",
+    ]
     rows = [
         [
             i.get("key"),
             i.get("summary"),
+            i.get("from_status"),
+            i.get("to_status"),
             i.get("transitioned_at"),
             i.get("performed_by"),
             i.get("assignee"),
