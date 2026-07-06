@@ -1,22 +1,27 @@
 # PPT Documentation Pack
 
-This folder explains the complete Developer Activity Reporting Web App in a presentation-friendly way.
+This folder contains presentation-ready documentation for the Developer Activity Reporting Web App.
 
-Recommended reading order:
+Read in this order:
 
-1. `01-project-overview.md` - what the project is and why it exists.
-2. `02-architecture-and-data-flow.md` - how frontend, backend, Confluence, and Jira communicate.
-3. `03-backend-deep-dive.md` - FastAPI backend internals.
-4. `04-frontend-deep-dive.md` - React frontend internals.
-5. `05-jira-and-confluence-integration.md` - Atlassian API concepts and project-specific integration.
-6. `06-report-logic-and-excel-export.md` - how both reports are calculated and exported.
-7. `07-setup-run-demo-testing.md` - setup, run commands, demo flow, and testing checklist.
-8. `08-presentation-script-and-faq.md` - ready-to-speak script and expected Q&A.
+1. `01-project-overview.md` - problem, solution, features, and terminology.
+2. `02-architecture-and-data-flow.md` - frontend/backend/Atlassian/Groq flow.
+3. `03-backend-deep-dive.md` - FastAPI internals and service design.
+4. `04-frontend-deep-dive.md` - React dashboard, routes, views, and API layer.
+5. `05-jira-and-confluence-integration.md` - Jira JQL, changelog, Confluence teams, and account IDs.
+6. `06-report-logic-and-excel-export.md` - report calculations and workbook export.
+7. `07-setup-run-demo-testing.md` - setup, run commands, live demo, and validation.
+8. `08-presentation-script-and-faq.md` - ready-to-speak script and viva Q&A.
 
-Do not add real `.env` values or API tokens to slides. Show variable names only.
+This pack documents the current implementation:
 
-This pack now also documents:
+- Groq-backed Advanced AI Search.
+- Visible executed JQL.
+- Project-scoped JQL enforcement.
+- Assigned-history reporting via `assignee WAS`.
+- Transition-history reporting via Jira changelog replay.
+- All one-step forward transitions, with Build -> Pending QA retained as a filter.
+- Name-to-accountId resolution with a Jira directory fallback.
+- Excel export for assigned and transitions reports.
 
-- the natural-language query feature
-- the `/api/reports/query` endpoint
-- where SOLID principles were applied in the backend NL query design
+Do not put real `.env` values, API tokens, Groq keys, screenshots with secrets, or account credentials into slides or prompt tools.

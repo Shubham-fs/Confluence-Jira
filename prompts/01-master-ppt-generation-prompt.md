@@ -1,115 +1,49 @@
-# Master PPT Generation Prompt
+# 01 - Master PPT Generation Prompt
 
-Copy and paste this prompt into a presentation AI tool.
+Create a professional project presentation for a full-stack web app named **Developer Activity Reporting**.
 
-```text
-Create a detailed technical PowerPoint presentation for a project named "Developer Activity Reporting Web App".
+## Project Summary
 
-The project is a full-stack application that integrates Confluence Cloud and Jira Cloud. It reads team membership from a Confluence page named "Team Members", reads Jira issues and changelog history from a Jira project named KAN, and generates developer activity reports in a React dashboard. It has a FastAPI backend and a React + Vite + TypeScript frontend.
+The app connects to Confluence Cloud, Jira Cloud, and Groq. It reads team membership from Confluence, reads issues and changelog history from Jira, and generates developer activity reports in a React dashboard. It also includes Groq-backed Advanced AI Search that converts a free-form prompt into a structured plan and visible executed JQL.
 
-The latest version also supports a natural-language query box that interprets questions like "issues assigned to Yash this month" or "what did Shubham move to QA last week" and routes them to the correct report.
+## Required Slide Deck
 
-Audience:
-- College project evaluators, teammates, and beginner developers.
-- Assume the audience understands basic web development but not Jira/Confluence APIs.
+Create 12 to 14 slides:
 
-Tone:
-- Clear, technical, practical, and presentation-ready.
-- Explain every important term: issue, assignee, actor, changelog, transition, JQL, API, backend, frontend, CORS, environment variables, Excel export.
+1. Title slide.
+2. Problem statement: manual developer reporting is slow and loses history.
+3. Solution overview.
+4. User-facing features.
+5. Architecture diagram: React frontend, FastAPI backend, Confluence, Jira, Groq.
+6. Jira and Confluence integration.
+7. Assigned Issues report: JQL `assignee WAS` history.
+8. Transitions report: changelog replay and one-step forward workflow moves.
+9. Build -> Pending QA as a transition filter.
+10. Advanced AI Search: Groq prompt to JSON plan to executed JQL.
+11. Backend design and SOLID principles.
+12. Frontend design and dashboard flow.
+13. Setup, testing, and demo plan.
+14. Security, limitations, and future scope.
 
-Required slide deck structure:
-1. Title slide
-2. Problem statement
-3. Why this project is useful
-4. Main objectives
-5. Technologies used
-6. High-level architecture
-7. User workflow
-8. Confluence integration: team fetching
-9. Jira integration: issue fetching
-10. Jira changelog integration: Build to Pending QA detection
-11. Report 1: Assigned Issues
-12. Report 2: Build to Pending QA
-13. Assignee vs Actor explanation
-14. Backend architecture
-15. Frontend architecture
-16. API endpoints
-17. Data flow sequence
-18. Excel export feature
-19. Natural-language query feature
-20. Security and environment variables
-21. Error handling and validation
-22. Testing and verification
-23. SOLID principles applied
-24. Limitations
-25. Future enhancements
-26. Conclusion
-27. Q&A slide
+## Must Mention
 
-Project details to include:
-- Backend framework: FastAPI.
-- Backend language: Python.
-- Backend HTTP client: httpx async client.
-- Backend validation: Pydantic v2 and pydantic-settings.
-- Backend Excel export: openpyxl.
-- Backend Confluence parsing: BeautifulSoup + lxml.
-- Frontend framework: React 18.
-- Frontend build tool: Vite.
-- Frontend language: TypeScript.
-- UI library: Material UI.
-- Data fetching: TanStack Query and axios.
-- Date handling: Dayjs.
-- Routing: React Router.
-- Backend port: 8000.
-- Frontend port: 5173.
+- Backend endpoints:
+  - `GET /api/health`
+  - `GET /api/teams`
+  - `GET /api/reports/assigned`
+  - `GET /api/reports/transitions`
+  - `GET /api/reports/ai-query`
+  - `GET /api/reports/export`
+- The old single Build -> Pending QA report is now generalized into Transitions.
+- Build -> Pending QA remains available through `transition=Pending QA`.
+- The app does not store Jira history locally.
+- Assigned history comes from `assignee WAS`.
+- Transition history comes from issue changelogs.
+- The UI displays the exact executed JQL for AI search.
+- The backend enforces `project = KAN` on custom JQL.
+- Names are resolved to Jira account IDs, with a user-directory fallback.
+- Secrets live in `.env` and must not be committed or shown.
 
-Important backend endpoints:
-- GET /api/health
-- GET /api/teams
-- GET /api/teams/{team}/members
-- GET /api/reports/assigned?member=...&from=...&to=...
-- GET /api/reports/build-to-qa?member=...&from=...&to=...&rule=assignee|actor
-- GET /api/reports/query?q=what did Yash move to QA last week
-- GET /api/reports/export?type=assigned|build-to-qa&member=...
+## Tone
 
-Explain the reports:
-- Assigned Issues report shows Jira issues currently assigned to the selected developer.
-- Build to Pending QA report scans each issue changelog and finds status changes where fromString is "Build" and toString is "Pending QA".
-- Rule = assignee means include the issue if the current assignee is the selected member.
-- Rule = actor means include the transition if the changelog author is the selected member.
-
-Explain the natural-language feature:
-- The frontend sends a plain-English question to `/api/reports/query`.
-- The backend parses member, date range, report type, and optional actor rule.
-- The query layer is deterministic and does not require an external LLM.
-
-Explain where SOLID was applied:
-- `DefaultQueryParser` parses text.
-- `TeamMemberDirectory` isolates member retrieval.
-- `NlQueryService` orchestrates report execution through abstractions.
-- Small detector classes keep the parser open for extension.
-
-Explain Jira terms:
-- Issue means a ticket/work item.
-- Issue key means unique ID like KAN-5.
-- Status means workflow state such as To Do, Build, Pending QA, Done.
-- Transition means moving an issue from one status to another.
-- Changelog means Jira's history log of who changed what and when.
-- Assignee means who owns the ticket.
-- Actor means who performed a specific action.
-
-Explain Confluence terms:
-- Space means a knowledge/documentation area.
-- Page means a document inside a space.
-- Storage format means Confluence's internal XHTML-like body format.
-- The app parses a table with columns Team and Members.
-
-For each slide, provide:
-- Slide title
-- 4-6 bullet points
-- Suggested visual diagram or screenshot
-- Speaker notes of 80-120 words
-
-Make the deck detailed enough that a teammate can present the project even if they did not build it.
-Do not include real API tokens or credentials.
-```
+Make the deck suitable for a college/project viva or internal technical demo. Keep slides concise, visual, and technically accurate.

@@ -1,52 +1,51 @@
-# Viva and Q&A Preparation Prompt
+# 04 - Viva And Q&A Preparation Prompt
 
-Use this to generate expected evaluator questions and answers.
+Prepare viva/interview questions and model answers for the Developer Activity Reporting project.
 
-```text
-Prepare a viva/interview question bank for a full-stack project named Developer Activity Reporting Web App.
+## Project Facts To Use
 
-Project summary:
-The app uses Confluence Cloud as the team source and Jira Cloud as the issue/workflow source. A FastAPI backend exposes APIs. A React frontend consumes those APIs. The app generates Assigned Issues and Build to Pending QA reports, supports natural-language queries, and exports results to Excel.
+- React/Vite/TypeScript frontend.
+- FastAPI backend.
+- Confluence Cloud provides team membership.
+- Jira Cloud provides issues, JQL search, and changelog history.
+- Groq powers Advanced AI Search.
+- Assigned Issues uses `assignee WAS`.
+- Transitions uses changelog replay.
+- Build -> Pending QA is preserved as a transition filter.
+- Custom JQL is project-scoped before execution.
+- Display names are resolved to Jira account IDs.
+- Excel export is generated backend-side.
 
-Create at least 60 questions with answers, grouped by topic:
+## Generate Q&A For These Areas
 
-1. Basic project understanding
-2. Jira concepts
-3. Confluence concepts
-4. Backend architecture
-5. Frontend architecture
-6. API design
-7. Report logic
-8. Assignee vs Actor
-9. Authentication and security
-10. Error handling
-11. Testing
-12. Natural-language query design
-13. SOLID principles used in the implementation
-14. Deployment possibilities
-15. Limitations and future scope
+1. Overall architecture.
+2. Why FastAPI and React were chosen.
+3. How Confluence teams are parsed.
+4. How Jira JQL is used.
+5. Why `assignee WAS` is needed.
+6. Why changelog is required for transitions.
+7. Difference between assignee and actor.
+8. How Build -> Pending QA is still available.
+9. How Groq AI Search works.
+10. Why the UI displays executed JQL.
+11. How project-scope enforcement prevents unsafe LLM queries.
+12. How names become account IDs.
+13. What happens when Jira user search returns empty.
+14. Error handling and validation.
+15. Testing strategy.
+16. Security and secrets handling.
+17. Limitations and future improvements.
 
-Questions should include:
-- What problem does this project solve?
-- What is a Jira issue?
-- What is a Jira changelog?
-- What is JQL?
-- Why does Build to Pending QA need changelog data?
-- What is the difference between assignee and actor?
-- Why use FastAPI?
-- Why use React?
-- Why use TypeScript?
-- Why use TanStack Query?
-- How is Excel export generated?
-- How are teams fetched from Confluence?
-- What happens if Confluence table format is wrong?
-- What happens if Jira credentials are wrong?
-- Why should `.env` not be committed?
-- What are the limitations of the current implementation?
-- How does the natural-language query feature work?
-- Why was it implemented without an external LLM?
-- Where were SOLID principles applied in the backend?
+## Include Strong Answers For
 
-Make answers clear and suitable for students presenting to faculty.
-Do not include real credentials or tokens.
-```
+- “Are you storing user history?”
+- “Is it using JQL?”
+- “How do you know who moved a ticket?”
+- “Why not rely only on current issue fields?”
+- “Can the LLM access credentials?”
+- “Can the LLM query another project?”
+- “What if Groq is down?”
+- “What if two users have similar names?”
+- “How would you scale this for many projects?”
+
+Answers should be concise, technically accurate, and presentation-ready.

@@ -1,51 +1,48 @@
-# Speaker Notes and Demo Script Prompt
+# 03 - Speaker Notes And Demo Script Prompt
 
-Use this to prepare what each teammate should say during presentation and demo.
+Create speaker notes and a live demo script for the Developer Activity Reporting app.
 
-```text
-Create a complete speaker script and demo script for a project presentation.
+## Demo Environment
 
-Project: Developer Activity Reporting Web App.
+- Backend: FastAPI on `http://localhost:8000`.
+- Frontend: Vite on `http://localhost:5173`.
+- Swagger docs: `http://localhost:8000/docs`.
+- Jira project key: `KAN`.
+- Workflow order: `To Do, Build, Pending QA, Done`.
 
-The project integrates:
-- React + Vite + TypeScript frontend
-- FastAPI backend
-- Confluence Cloud team page
-- Jira Cloud KAN project
-- Excel export
+## Demo Flow
 
-Create:
-1. Opening speech of 1 minute.
-2. Technical explanation speech of 5-7 minutes.
-3. Live demo script of 4-5 minutes.
-4. Backup explanation if the live demo internet/API fails.
-5. Closing speech of 30 seconds.
-6. Division of speaking parts among 3 team members.
+Write a step-by-step spoken script for:
 
-Demo script must include these steps:
-- Show Confluence Team Members page and explain team source.
-- Show Jira Kanban board and explain issue/status/assignee.
-- Open frontend at http://localhost:5173.
-- Use the plain-English query box with a sample question.
-- Select a team.
-- Select a member.
-- Explain date range filtering.
-- Click Generate.
-- Show Assigned Issues report.
-- Open Build to Pending QA report.
-- Explain Assignee vs Actor toggle.
-- Export one report to Excel.
-- Mention backend API docs at http://localhost:8000/docs.
+1. Opening the dashboard.
+2. Showing Confluence-sourced Team and Member selectors.
+3. Generating Assigned Issues.
+4. Explaining `assignee WAS` and Jira-side history.
+5. Opening the Transitions tab.
+6. Explaining one-step forward workflow transitions.
+7. Selecting Build -> Pending QA from the Transition dropdown.
+8. Toggling By assignee and By actor.
+9. Running Advanced AI Search with a prompt.
+10. Pointing to the visible executed JQL.
+11. Explaining project-scope enforcement and accountId resolution.
+12. Exporting to Excel.
 
-Important explanations:
-- Issue = Jira ticket/work item.
-- Assignee = current owner of issue.
-- Actor = person who performed a transition in changelog.
-- Changelog = history of changes in Jira.
-- Build to Pending QA = workflow transition detected by code.
-- Natural-language query = a backend-interpreted plain-English request that maps to an existing report.
-- SOLID design = parsing, member lookup, and report execution are separated into smaller backend collaborators.
+## Speaker Notes Must Include
 
-Make the script natural, not robotic. Use simple words but keep technical correctness.
-Do not include secrets or API tokens.
-```
+- The app stores no Jira history locally.
+- Assigned report uses JQL history: `assignee WAS`.
+- Transitions report uses changelog replay.
+- Build -> Pending QA is retained as a filter, not removed.
+- Groq is used for planning, not direct database access.
+- The backend validates and scopes what the LLM proposes.
+- Secrets should never appear in slides or screenshots.
+
+## Output Format
+
+Provide:
+
+- Opening script.
+- Slide-by-slide speaker notes.
+- Live demo narration.
+- Backup explanation if Groq is unavailable.
+- Closing summary.

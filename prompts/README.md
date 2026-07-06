@@ -1,22 +1,27 @@
-# Prompts Pack for Project PPT
+# Prompts Pack For Project PPT
 
-This folder contains ready-to-use prompts your team can paste into ChatGPT, Copilot, Gemini, PowerPoint Copilot, Gamma, Canva, or any PPT-making AI tool.
+This folder contains prompts for generating presentation material from the current Developer Activity Reporting project.
 
-Use the prompts in this order:
+Use them in order:
 
-1. `01-master-ppt-generation-prompt.md` - creates the full presentation structure.
-2. `02-slide-by-slide-content-prompt.md` - expands every slide with detailed content.
-3. `03-speaker-notes-and-demo-script-prompt.md` - creates speaking notes and a live demo script.
-4. `04-viva-and-qna-preparation-prompt.md` - prepares interview/viva questions and answers.
+1. `01-master-ppt-generation-prompt.md` - full deck structure.
+2. `02-slide-by-slide-content-prompt.md` - expanded slide content.
+3. `03-speaker-notes-and-demo-script-prompt.md` - spoken notes and live demo.
+4. `04-viva-and-qna-preparation-prompt.md` - viva/interview Q&A.
 
-Important:
+Important rules:
 
-- Do not paste real secrets, API tokens, or `.env` values into any AI tool.
-- If a tool asks for project credentials, only describe them as environment variables.
-- Use screenshots from the running app and Jira board when making the final PPT.
+- Do not paste real Atlassian tokens, Groq keys, or `.env` values into any AI tool.
+- Describe credentials only as environment variables.
+- Use screenshots from the running app and Jira board only after hiding secrets.
 
-The prompts should now mention:
+The prompts now cover:
 
-- the natural-language query feature
-- the `/api/reports/query` endpoint
-- where SOLID principles were applied in the backend NL query implementation
+- Groq-backed Advanced AI Search.
+- Visible executed JQL.
+- Project-scope enforcement for AI-proposed JQL.
+- Assigned history via Jira `assignee WAS`.
+- Transition history via Jira changelog replay.
+- Build -> Pending QA preserved as a transition filter.
+- Name-to-accountId fallback.
+- Excel export and setup/testing workflow.
