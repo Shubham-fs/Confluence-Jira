@@ -11,6 +11,7 @@ import { buildTheme } from './theme/theme';
 import { ColorModeContext } from './theme/ColorModeContext';
 import Layout from './components/Layout/Layout';
 import DashboardPage from './pages/DashboardPage';
+import PresentationPage from './pages/PresentationPage';
 
 export default function App() {
   const [mode, setMode] = useState<PaletteMode>('light');
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/" element={<DashboardPage />} />
               <Route path="/assigned" element={<DashboardPage />} />
               <Route path="/transitions" element={<DashboardPage />} />
+              <Route path="/presentation" element={<PresentationPage />} />
             </Routes>
           </Layout>
         </LocalizationProvider>
