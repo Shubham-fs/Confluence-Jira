@@ -11,7 +11,6 @@ import { Link, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
-import SlideshowIcon from '@mui/icons-material/Slideshow';
 import InsightsIcon from '@mui/icons-material/Insights';
 
 const DRAWER_WIDTH = 240;
@@ -62,16 +61,6 @@ export default function Sidebar() {
               <PublishedWithChangesIcon />
             </ListItemIcon>
             <ListItemText primary="Transitions" />
-          </ListItemButton>
-          <ListItemButton
-            component={Link}
-            to="/presentation"
-            selected={pathname === '/presentation'}
-          >
-            <ListItemIcon>
-              <SlideshowIcon />
-            </ListItemIcon>
-            <ListItemText primary="Presentation" />
           </ListItemButton>
           <ListItemButton
             component={Link}
