@@ -9,6 +9,7 @@ from app.clients.groq_client import GroqError
 from app.models.schemas import (
     AiQueryResponse,
     AssignedReport,
+    TeamAnalytics,
     TransitionReport,
 )
 from app.routers.deps import (
@@ -54,6 +55,16 @@ async def transitions(
 ) -> TransitionReport:
     data = await service.transitions(member, from_, to, rule, transition)
     return TransitionReport.model_validate(data)
+
+
+@router.get("/analytics", response_model=TeamAnalytics)
+async def analytics(
+    from_: str | None = Query(None, alias="from", description="YYYY-MM-DD"),
+    to: str | None = Query(None, description="YYYY-MM-DD"),
+    service: ReportService = Depends(get_report_service),
+) -> TeamAnalytics:
+    data = await service.team_analytics(from_, to)
+    return TeamAnalytics.model_validate(data)
 
 
 @router.get("/ai-query", response_model=AiQueryResponse)

@@ -35,6 +35,7 @@ export default function App() {
               <Route path="/assigned" element={<DashboardPage />} />
               <Route path="/transitions" element={<DashboardPage />} />
               <Route path="/presentation" element={<PresentationPage />} />
+              <Route path="/analytics" element={<DashboardPage />} />
             </Routes>
           </Layout>
         </LocalizationProvider>

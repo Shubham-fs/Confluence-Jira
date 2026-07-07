@@ -12,6 +12,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
+import InsightsIcon from '@mui/icons-material/Insights';
 
 const DRAWER_WIDTH = 240;
 
@@ -71,6 +72,16 @@ export default function Sidebar() {
               <SlideshowIcon />
             </ListItemIcon>
             <ListItemText primary="Presentation" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/analytics"
+            selected={pathname === '/analytics'}
+          >
+            <ListItemIcon>
+              <InsightsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Analytics" />
           </ListItemButton>
         </List>
       </Box>

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
+  fetchAnalytics,
   fetchAssignedReport,
   fetchTransitions,
   type ReportParams,
@@ -37,5 +38,19 @@ export function useTransitionsReport(
     ],
     queryFn: () => fetchTransitions(params),
     enabled: enabled && Boolean(params.member),
+  });
+}
+
+export function useAnalytics(filters: {
+  from?: string;
+  to?: string;
+  enabled: boolean;
+  runId?: number;
+}) {
+  const { enabled, runId, ...params } = filters;
+  return useQuery({
+    queryKey: ['analytics', params.from, params.to, runId],
+    queryFn: () => fetchAnalytics(params),
+    enabled,
   });
 }

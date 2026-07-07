@@ -89,6 +89,55 @@ export interface AiQueryResponse {
   issues: AiIssue[];
 }
 
+export interface CountItem {
+  label: string;
+  value: number;
+}
+
+export interface BottleneckIssue {
+  key: string;
+  summary: string | null;
+  status: string;
+  assignee: string | null;
+  age_hours: number;
+  threshold_hours: number;
+  url: string | null;
+}
+
+export interface WorkloadMember {
+  name: string;
+  active_issues: number;
+  difference_from_average: number;
+}
+
+export interface WorkloadBalance {
+  average_active_issues: number;
+  overloaded: WorkloadMember[];
+  available: WorkloadMember[];
+  suggestions: string[];
+}
+
+export interface StandupSummary {
+  headline: string;
+  highlights: string[];
+  recommended_actions: string[];
+}
+
+export interface TeamAnalytics {
+  from: string | null;
+  to: string | null;
+  total: number;
+  resolved: number;
+  in_progress: number;
+  avg_cycle_time_days: number;
+  by_status: CountItem[];
+  by_assignee: CountItem[];
+  by_priority: CountItem[];
+  bottlenecks: BottleneckIssue[];
+  workload_balance: WorkloadBalance;
+  standup_summary: StandupSummary;
+}
+
 export interface ApiError {
   error: {
     code: string;

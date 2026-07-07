@@ -20,6 +20,7 @@ import MemberSelect from '../components/MemberSelect';
 import DateRangePicker from '../components/DateRangePicker';
 import AssignedReportView from '../components/reports/AssignedReportView';
 import TransitionReportView from '../components/reports/TransitionReportView';
+import AnalyticsDashboard from '../components/reports/AnalyticsDashboard';
 import AiQueryPanel from '../components/reports/AiQueryPanel';
 import type { TransitionRule } from '../api/types';
 
@@ -38,9 +39,16 @@ export default function DashboardPage() {
   const [from, setFrom] = useState<Dayjs | null>(dayjs().startOf('year'));
   const [to, setTo] = useState<Dayjs | null>(dayjs().endOf('year'));
   // The active tab is driven by the route so the sidebar links stay in sync.
-  const tab = location.pathname === '/transitions' ? 1 : 0;
+  const tab =
+    location.pathname === '/transitions'
+      ? 1
+      : location.pathname === '/analytics'
+        ? 2
+        : 0;
   const handleTabChange = (value: number) =>
-    navigate(value === 1 ? '/transitions' : '/assigned');
+    navigate(
+      value === 1 ? '/transitions' : value === 2 ? '/analytics' : '/assigned',
+    );
   const [rule, setRule] = useState<TransitionRule>('assignee');
   const [applied, setApplied] = useState<AppliedFilters | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -117,9 +125,17 @@ export default function DashboardPage() {
         >
           <Tab label="Assigned Issues" />
           <Tab label="Transitions" />
+          <Tab label="Analytics" />
         </Tabs>
         <CardContent>
-          {!applied ? (
+          {tab === 2 ? (
+            <AnalyticsDashboard
+              from={from ? from.format('YYYY-MM-DD') : undefined}
+              to={to ? to.format('YYYY-MM-DD') : undefined}
+              runId={applied?.runId}
+              enabled
+            />
+          ) : !applied ? (
             <Typography color="text.secondary" sx={{ py: 6, textAlign: 'center' }}>
               Choose your filters above and click <strong>Generate</strong> to view
               reports.

@@ -110,6 +110,69 @@ class AiQueryResponse(BaseModel):
     issues: list[AiIssue]
 
 
+class CountItem(BaseModel):
+    """A single labelled count used by the analytics charts."""
+
+    label: str
+    value: int
+
+
+class BottleneckIssue(BaseModel):
+    """An issue that has stayed in an active workflow status for too long."""
+
+    key: str
+    summary: str | None = None
+    status: str
+    assignee: str | None = None
+    age_hours: int
+    threshold_hours: int
+    url: str | None = None
+
+
+class WorkloadMember(BaseModel):
+    """A developer's active workload and balance status."""
+
+    name: str
+    active_issues: int
+    difference_from_average: float
+
+
+class WorkloadBalance(BaseModel):
+    """Workload balance insight for active issues in the project."""
+
+    average_active_issues: float
+    overloaded: list[WorkloadMember] = Field(default_factory=list)
+    available: list[WorkloadMember] = Field(default_factory=list)
+    suggestions: list[str] = Field(default_factory=list)
+
+
+class StandupSummary(BaseModel):
+    """A concise team-lead summary generated from analytics signals."""
+
+    headline: str
+    highlights: list[str] = Field(default_factory=list)
+    recommended_actions: list[str] = Field(default_factory=list)
+
+
+class TeamAnalytics(BaseModel):
+    """Aggregated project-wide metrics for the analytics dashboard."""
+
+    from_date: str | None = Field(default=None, alias="from")
+    to_date: str | None = Field(default=None, alias="to")
+    total: int
+    resolved: int
+    in_progress: int
+    avg_cycle_time_days: float
+    by_status: list[CountItem]
+    by_assignee: list[CountItem]
+    by_priority: list[CountItem]
+    bottlenecks: list[BottleneckIssue] = Field(default_factory=list)
+    workload_balance: WorkloadBalance
+    standup_summary: StandupSummary
+
+    model_config = {"populate_by_name": True}
+
+
 class ErrorDetail(BaseModel):
     code: str
     message: str

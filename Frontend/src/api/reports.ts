@@ -3,6 +3,7 @@ import type {
   AiQueryResponse,
   AssignedReport,
   ReportType,
+  TeamAnalytics,
   TransitionReport,
   TransitionRule,
 } from './types';
@@ -36,6 +37,16 @@ export async function fetchTransitions(
 export async function aiQueryReports(q: string): Promise<AiQueryResponse> {
   const { data } = await apiClient.get<AiQueryResponse>('/api/reports/ai-query', {
     params: { q },
+  });
+  return data;
+}
+
+/** Fetch aggregated project-wide metrics for the analytics dashboard. */
+export async function fetchAnalytics(
+  params: { from?: string; to?: string },
+): Promise<TeamAnalytics> {
+  const { data } = await apiClient.get<TeamAnalytics>('/api/reports/analytics', {
+    params,
   });
   return data;
 }

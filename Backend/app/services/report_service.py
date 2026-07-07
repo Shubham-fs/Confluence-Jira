@@ -12,6 +12,7 @@ from app.clients.jira_client import JiraClient
 DEFAULT_STATUS_ORDER = ["To Do", "Build", "Pending QA", "Done"]
 
 ISSUE_FIELDS = ["summary", "status", "assignee", "created", "updated", "reporter"]
+BOTTLENECK_THRESHOLD_HOURS = 24
 
 
 def _issue_url(site: str, key: str) -> str:
@@ -50,6 +51,134 @@ def _within_range(
     if to_date and stamp > date.fromisoformat(to_date):
         return False
     return True
+
+
+def _hours_since(iso_ts: str | None, now: datetime | None = None) -> int | None:
+    stamp = _parse_ts(iso_ts)
+    if stamp is None:
+        return None
+    current = now or datetime.now(stamp.tzinfo)
+    return max(int((current - stamp).total_seconds() // 3600), 0)
+
+
+def _status_entered_at(
+    current_status: str | None, changelog_values: list[dict[str, Any]]
+) -> str | None:
+    if not current_status:
+        return None
+    latest: str | None = None
+    for entry in changelog_values:
+        for item in entry.get("items", []):
+            if item.get("field") == "status" and item.get("toString") == current_status:
+                latest = entry.get("created")
+    return latest
+
+
+def _workload_balance(active_counts: dict[str, int]) -> dict[str, Any]:
+    named_counts = {
+        name: count
+        for name, count in active_counts.items()
+        if name and name != "Unassigned"
+    }
+    if not named_counts:
+        return {
+            "average_active_issues": 0.0,
+            "overloaded": [],
+            "available": [],
+            "suggestions": [],
+        }
+
+    average = round(sum(named_counts.values()) / len(named_counts), 1)
+
+    def _member(name: str, count: int) -> dict[str, Any]:
+        return {
+            "name": name,
+            "active_issues": count,
+            "difference_from_average": round(count - average, 1),
+        }
+
+    overloaded = [
+        _member(name, count)
+        for name, count in named_counts.items()
+        if count >= average + 2
+    ]
+    available = [
+        _member(name, count)
+        for name, count in named_counts.items()
+        if count <= average - 2
+    ]
+    overloaded.sort(key=lambda item: item["difference_from_average"], reverse=True)
+    available.sort(key=lambda item: item["difference_from_average"])
+
+    suggestions: list[str] = []
+    for overloaded_member, available_member in zip(overloaded, available):
+        move_count = min(
+            int(overloaded_member["difference_from_average"]),
+            int(abs(available_member["difference_from_average"])),
+        )
+        if move_count > 0:
+            suggestions.append(
+                f"Consider moving {move_count} issue(s) from "
+                f"{overloaded_member['name']} to {available_member['name']}."
+            )
+
+    return {
+        "average_active_issues": average,
+        "overloaded": overloaded,
+        "available": available,
+        "suggestions": suggestions,
+    }
+
+
+def _standup_summary(
+    total: int,
+    resolved: int,
+    bottlenecks: list[dict[str, Any]],
+    workload_balance: dict[str, Any],
+) -> dict[str, Any]:
+    highlights = [
+        f"{total} issue(s) are in scope; {resolved} resolved and {total - resolved} still active."
+    ]
+    recommended_actions: list[str] = []
+
+    if bottlenecks:
+        top = bottlenecks[0]
+        highlights.append(
+            f"{len(bottlenecks)} issue(s) are at risk after crossing the 24-hour active-stage limit."
+        )
+        highlights.append(
+            f"Highest attention: {top['key']} is in {top['status']} for {top['age_hours']} hours."
+        )
+        recommended_actions.append(
+            f"Review {top['key']} first and unblock its {top['status']} stage."
+        )
+    else:
+        highlights.append("No workflow-stage bottlenecks are currently detected.")
+
+    overloaded = workload_balance.get("overloaded", [])
+    available = workload_balance.get("available", [])
+    suggestions = workload_balance.get("suggestions", [])
+    if overloaded:
+        lead = overloaded[0]
+        highlights.append(
+            f"{lead['name']} is carrying the highest load with {lead['active_issues']} active issue(s)."
+        )
+    if available:
+        capacity = available[0]
+        highlights.append(
+            f"{capacity['name']} has available capacity with {capacity['active_issues']} active issue(s)."
+        )
+    recommended_actions.extend(suggestions)
+
+    if not recommended_actions:
+        recommended_actions.append("Continue monitoring active issues and keep the current assignment plan.")
+
+    headline = "Team needs attention" if bottlenecks or overloaded else "Team workload looks healthy"
+    return {
+        "headline": headline,
+        "highlights": highlights,
+        "recommended_actions": recommended_actions,
+    }
 
 
 def enforce_project_scope(jql: str | None, project_key: str) -> str:
@@ -378,6 +507,112 @@ class ReportService:
             "count": len(issues),
             "issues": issues,
         }
+
+    async def team_analytics(
+        self, from_date: str | None = None, to_date: str | None = None
+    ) -> dict[str, Any]:
+        """Aggregate project-wide metrics for the analytics dashboard.
+
+        Returns issue counts grouped by status, assignee and priority, plus a
+        resolved/in-progress split and the average cycle time (created ->
+        resolved, in days) over the resolved issues in scope. The query stays
+        bounded by project and, when provided, by the ``updated`` window.
+        """
+        clauses = [f"project = {self._project_key}"]
+        if from_date:
+            clauses.append(f'updated >= "{from_date}"')
+        if to_date:
+            clauses.append(f'updated <= "{to_date}"')
+        jql = " AND ".join(clauses) + " ORDER BY updated DESC"
+        fields = ISSUE_FIELDS + ["resolutiondate", "priority"]
+        raw = await self._jira.search_jql(jql, fields=fields, max_results=200)
+
+        by_status: dict[str, int] = {}
+        by_assignee: dict[str, int] = {}
+        by_priority: dict[str, int] = {}
+        active_by_assignee: dict[str, int] = {}
+        cycle_times: list[float] = []
+        bottlenecks: list[dict[str, Any]] = []
+        resolved = 0
+
+        for issue in raw:
+            fields_data = issue.get("fields", {})
+            status = (fields_data.get("status") or {}).get("name") or "Unknown"
+            by_status[status] = by_status.get(status, 0) + 1
+            assignee = _display_name(fields_data.get("assignee")) or "Unassigned"
+            by_assignee[assignee] = by_assignee.get(assignee, 0) + 1
+            priority = (fields_data.get("priority") or {}).get("name") or "None"
+            by_priority[priority] = by_priority.get(priority, 0) + 1
+
+            resolution = fields_data.get("resolutiondate")
+            if resolution:
+                resolved += 1
+                created_dt = _parse_ts(fields_data.get("created"))
+                resolved_dt = _parse_ts(resolution)
+                if created_dt and resolved_dt:
+                    cycle_times.append(
+                        (resolved_dt - created_dt).total_seconds() / 86400
+                    )
+            else:
+                active_by_assignee[assignee] = active_by_assignee.get(assignee, 0) + 1
+
+            if status in self._status_order and status != self._status_order[-1]:
+                entered_at = await self._issue_status_entered_at(issue, status)
+                age_hours = _hours_since(entered_at)
+                if age_hours is not None and age_hours >= BOTTLENECK_THRESHOLD_HOURS:
+                    bottlenecks.append(
+                        {
+                            "key": issue.get("key"),
+                            "summary": fields_data.get("summary"),
+                            "status": status,
+                            "assignee": assignee,
+                            "age_hours": age_hours,
+                            "threshold_hours": BOTTLENECK_THRESHOLD_HOURS,
+                            "url": _issue_url(self._site, issue.get("key")),
+                        }
+                    )
+
+        avg_cycle = (
+            round(sum(cycle_times) / len(cycle_times), 1) if cycle_times else 0.0
+        )
+
+        def _items(counts: dict[str, int]) -> list[dict[str, Any]]:
+            return [
+                {"label": label, "value": value}
+                for label, value in sorted(counts.items(), key=lambda kv: -kv[1])
+            ]
+
+        bottlenecks = sorted(
+            bottlenecks, key=lambda item: item["age_hours"], reverse=True
+        )
+        workload_balance = _workload_balance(active_by_assignee)
+
+        return {
+            "from": from_date,
+            "to": to_date,
+            "total": len(raw),
+            "resolved": resolved,
+            "in_progress": len(raw) - resolved,
+            "avg_cycle_time_days": avg_cycle,
+            "by_status": _items(by_status),
+            "by_assignee": _items(by_assignee),
+            "by_priority": _items(by_priority),
+            "bottlenecks": bottlenecks,
+            "workload_balance": workload_balance,
+            "standup_summary": _standup_summary(
+                len(raw), resolved, bottlenecks, workload_balance
+            ),
+        }
+
+    async def _issue_status_entered_at(
+        self, issue: dict[str, Any], status: str | None
+    ) -> str | None:
+        key = issue.get("key")
+        fields = issue.get("fields", {})
+        if not key or not hasattr(self._jira, "issue_changelog"):
+            return fields.get("updated") or fields.get("created")
+        changelog = await self._jira.issue_changelog(key)
+        return _status_entered_at(status, changelog) or fields.get("updated") or fields.get("created")
 
     async def _resolve_jql_users(self, jql: str) -> str:
         """Swap quoted display names in assignee/reporter clauses for ids.
