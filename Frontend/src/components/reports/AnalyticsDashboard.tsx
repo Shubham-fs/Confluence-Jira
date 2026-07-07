@@ -8,8 +8,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from '@mui/x-charts/PieChart';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useAnalytics } from '../../hooks/useReports';
 import { TableSkeleton } from '../LoadingState';
@@ -88,6 +86,87 @@ function CountSummary({ items, colors }: { items: CountItem[]; colors: string[] 
           <Typography variant="body2" fontWeight={700}>
             {item.value}
           </Typography>
+        </Stack>
+      ))}
+    </Stack>
+  );
+}
+
+function DonutSummary({ items, colors }: { items: CountItem[]; colors: string[] }) {
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+  let cursor = 0;
+  const segments = total
+    ? items.map((item, index) => {
+        const start = cursor;
+        const end = cursor + (item.value / total) * 360;
+        cursor = end;
+        return `${colors[index % colors.length]} ${start}deg ${end}deg`;
+      })
+    : ['#e5e7eb 0deg 360deg'];
+
+  return (
+    <Box
+      sx={{
+        height: 240,
+        display: 'grid',
+        placeItems: 'center',
+      }}
+    >
+      <Box
+        sx={{
+          width: 190,
+          height: 190,
+          borderRadius: '50%',
+          background: `conic-gradient(${segments.join(', ')})`,
+          display: 'grid',
+          placeItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            width: 112,
+            height: 112,
+            borderRadius: '50%',
+            bgcolor: 'background.paper',
+            display: 'grid',
+            placeItems: 'center',
+            boxShadow: 1,
+          }}
+        >
+          <Typography variant="h5" fontWeight={700}>
+            {total}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function HorizontalBars({ items, colors }: { items: CountItem[]; colors: string[] }) {
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+
+  return (
+    <Stack spacing={1.25} sx={{ minHeight: 240, justifyContent: 'center' }}>
+      {items.map((item, index) => (
+        <Stack key={item.label} spacing={0.5}>
+          <Stack direction="row" justifyContent="space-between" spacing={2}>
+            <Typography variant="body2" color="text.secondary">
+              {item.label}
+            </Typography>
+            <Typography variant="body2" fontWeight={700}>
+              {item.value}
+            </Typography>
+          </Stack>
+          <Box sx={{ height: 10, borderRadius: 999, bgcolor: 'action.hover' }}>
+            <Box
+              sx={{
+                width: `${(item.value / maxValue) * 100}%`,
+                height: '100%',
+                borderRadius: 999,
+                bgcolor: colors[index % colors.length],
+              }}
+            />
+          </Box>
         </Stack>
       ))}
     </Stack>
@@ -389,21 +468,7 @@ export default function AnalyticsDashboard({
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                 Issues by status
               </Typography>
-              <PieChart
-                height={280}
-                colors={statusColors}
-                series={[
-                  {
-                    data: data.by_status.map((s, i) => ({
-                      id: i,
-                      label: s.label,
-                      value: s.value,
-                      color: statusColors[i % statusColors.length],
-                    })),
-                    highlightScope: { faded: 'global', highlighted: 'item' },
-                  },
-                ]}
-              />
+              <DonutSummary items={data.by_status} colors={statusColors} />
               <CountSummary items={data.by_status} colors={statusColors} />
             </CardContent>
           </Card>
@@ -414,20 +479,7 @@ export default function AnalyticsDashboard({
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                 Workload by member
               </Typography>
-              <BarChart
-                height={280}
-                colors={[workloadColors[0]]}
-                layout="horizontal"
-                yAxis={[
-                  {
-                    scaleType: 'band',
-                    data: data.by_assignee.map((m) => m.label),
-                  },
-                ]}
-                series={[
-                  { data: data.by_assignee.map((m) => m.value), label: 'Issues' },
-                ]}
-              />
+              <HorizontalBars items={data.by_assignee} colors={workloadColors} />
               <CountSummary items={data.by_assignee} colors={workloadColors} />
             </CardContent>
           </Card>
@@ -438,23 +490,7 @@ export default function AnalyticsDashboard({
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                 Issues by priority
               </Typography>
-              <BarChart
-                height={260}
-                colors={[priorityColors[1]]}
-                layout="horizontal"
-                yAxis={[
-                  {
-                    scaleType: 'band',
-                    data: data.by_priority.map((p) => p.label),
-                  },
-                ]}
-                series={[
-                  {
-                    data: data.by_priority.map((p) => p.value),
-                    label: 'Issues',
-                  },
-                ]}
-              />
+              <HorizontalBars items={data.by_priority} colors={priorityColors} />
               <CountSummary items={data.by_priority} colors={priorityColors} />
             </CardContent>
           </Card>
